@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DermVision AI - Skin Disease Detection & Decision Support</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="background-glows">
+        <div class="glow glow-1"></div>
+        <div class="glow glow-2"></div>
+        <div class="glow glow-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header animate-fade-in">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-laptop-medical"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>DermVision <span>AI</span></h1>
+                    <p>Enhanced Deep Learning Framework for Skin Lesion Classification</p>
+                </div>
+            </div>
+            <div class="header-controls">
+                <button class="btn btn-secondary btn-sm" id="history-toggle-btn">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Scan History
+                </button>
+                <div class="status-indicator">
+                    <span class="status-dot {% if pytorch_status %}active{% else %}warning{% endif %}"></span>
+                    <span class="status-label">
+                        {% if pytorch_status %}
+                            PyTorch Core Active
+                        {% else %}
+                            Demo Fallback Active (No PyTorch)
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="workspace-grid">
+            <!-- Left Panel: Input & Preprocessing -->
+            <section class="workspace-card left-panel animate-slide-up">
+                <div class="card-header">
+                    <h2><i class="fa-solid fa-camera"></i> Lesion Image Analysis</h2>
+                    <p>Upload a dermoscopic image to execute the preprocessing and classification pipeline.</p>
+                </div>
+
+                <!-- Upload Section -->
+                <div class="upload-zone" id="drop-zone">
+                    <input type="file" id="file-input" accept="image/*" style="display: none;">
+                    <div class="upload-content" id="upload-prompt">
+                        <div class="upload-icon-wrapper">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                        </div>
+                        <h3>Drag & drop your image here</h3>
+                        <p>Supports JPEG, PNG up to 10MB</p>
+                        <button class="btn btn-primary" id="browse-btn">
+                            <i class="fa-solid fa-folder-open"></i> Browse Files
+                        </button>
+                    </div>
+                    
+                    <!-- Preview and Loading State -->
+                    <div class="upload-preview hidden" id="upload-preview">
+                        <img id="preview-img" src="" alt="Lesion Preview">
+                        <div class="preview-overlay" id="loading-overlay">
+                            <div class="spinner"></div>
+                            <p id="loading-status">Executing Morphological Dull Razor...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preprocessing Visualizer Tabs -->
+                <div class="preprocessing-container hidden" id="preprocessing-panel">
+                    <div class="section-title">
+                        <h3><i class="fa-solid fa-wand-magic-sparkles"></i> Preprocessing Pipeline Visualizer</h3>
+                        <p>Click tabs to view each stage of the image processing sequence.</p>
+                    </div>
+                    
+                    <div class="tabs-header" id="preprocessing-tabs">
+                        <button class="tab-btn active" data-step="original">Original</button>
+                        <button class="tab-btn" data-step="grayscale">Grayscale</button>
+                        <button class="tab-btn" data-step="blackhat">Morphological</button>
+                        <button class="tab-btn" data-step="hair_mask">Hair Mask</button>
+                        <button class="tab-btn" data-step="hair_removed">Hair Removed</button>
+                        <button class="tab-btn" data-step="enhanced">Contrast Enhanced</button>
+                    </div>
+                    
+                    <div class="tab-content-wrapper">
+                        <div class="tab-view-frame">
+                            <img id="tab-display-img" src="" alt="Preprocessing Step">
+                            <div class="step-explanation" id="step-desc">
+                                Original lesion image uploaded by user.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Panel: Results & Decision Support -->
+            <section class="workspace-card right-panel animate-slide-up" style="animation-delay: 0.1s;">
+                <!-- Initial State: Welcome & Project Abstract -->
+                <div class="welcome-view" id="welcome-view">
+                    <div class="welcome-icon">
+                        <i class="fa-solid fa-user-doctor"></i>
+                    </div>
+                    <h2>Clinical Decision Support</h2>
+                    <p class="welcome-text">
+                        Welcome to the DermVision AI framework. This platform is designed to assist in dermatological screening by combining advanced digital image processing with deep transfer learning.
+                    </p>
+                    <div class="abstract-box">
+                        <h4><i class="fa-solid fa-circle-info"></i> Methodology Overview</h4>
+                        <ul>
+                            <li><strong>Preprocessing:</strong> Artifacts (hairs) are segmented using mathematical morphology (Blackhat kernel) and inpainted. Contrast is dynamically balanced via CLAHE in LAB space.</li>
+                            <li><strong>Classification:</strong> Features are extracted using a MobileNetV2 architecture fine-tuned via Transfer Learning.</li>
+                            <li><strong>Attention Mechanism:</strong> A Squeeze-and-Excitation (SE) block adaptively reweights channel feature maps to focus on the lesion borders.</li>
+                            <li><strong>Decision Support:</strong> Provides clinically aligned precautions, skincare guidelines, and dermatologist referral triggers.</li>
+                        </ul>
+                    </div>
+                    <div class="member-credits">
+                        <p><strong>Developed by Group G-13:</strong> V. Bhanu Vaishnavi, S. Harshitha, N. Shravani</p>
+                        <p><strong>Project Guide:</strong> Mrs. N. Meghana</p>
+                    </div>
+                </div>
+
+                <!-- Results View (Hidden Initially) -->
+                <div class="results-view hidden" id="results-view">
+                    <!-- Top Diagnostics Card -->
+                    <div class="diagnostic-card">
+                        <div class="diagnostic-badge" id="risk-badge">Low Risk</div>
+                        <div class="diagnostic-main">
+                            <h3 id="result-title">Melanocytic Nevi</h3>
+                            <p class="diagnostic-type" id="result-type">Benign Lesion</p>
+                        </div>
+                        <div class="diagnostic-score">
+                            <div class="score-circle">
+                                <svg class="progress-ring" width="70" height="70">
+                                    <circle class="progress-ring__circle-bg" stroke="rgba(255,255,255,0.05)" stroke-width="6" fill="transparent" r="28" cx="35" cy="35"/>
+                                    <circle class="progress-ring__circle" id="confidence-ring" stroke="var(--accent-color)" stroke-width="6" fill="transparent" r="28" cx="35" cy="35"/>
+                                </svg>
+                                <div class="score-value"><span id="result-confidence">98</span>%</div>
+                            </div>
+                            <span class="score-label">Confidence</span>
+                        </div>
+                    </div>
+
+                    <!-- Demo Mode Alert -->
+                    <div class="demo-alert hidden" id="demo-alert">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span><strong>Demo Mode Active:</strong> PyTorch was unavailable. Results are simulated, but image preprocessing is fully active.</span>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="results-section">
+                        <h4>Description</h4>
+                        <p id="result-desc" class="lesion-description">Lesion details...</p>
+                    </div>
+
+                    <!-- Probability Bars -->
+                    <div class="results-section">
+                        <h4>Probability Distribution</h4>
+                        <div class="distribution-list" id="distribution-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Decision Support Module -->
+                    <div class="results-section decision-support-section">
+                        <div class="decision-header">
+                            <h4><i class="fa-solid fa-shield-halved"></i> Decision Support & Guidance</h4>
+                        </div>
+                        
+                        <div class="decision-tabs">
+                            <button class="decision-tab-btn active" data-section="skincare">
+                                <i class="fa-solid fa-pump-soap"></i> Skincare Support
+                            </button>
+                            <button class="decision-tab-btn" data-section="precautions">
+                                <i class="fa-solid fa-hand-holding-hand"></i> Precautions
+                            </button>
+                            <button class="decision-tab-btn" data-section="medical">
+                                <i class="fa-solid fa-stethoscope"></i> Dermatologist Guide
+                            </button>
+                        </div>
+
+                        <div class="decision-content">
+                            <!-- Skincare Section -->
+                            <div class="decision-panel active" id="panel-skincare">
+                                <ul id="list-skincare" class="support-list">
+                                    <!-- Populated by JS -->
+                                </ul>
+                            </div>
+                            <!-- Precautions Section -->
+                            <div class="decision-panel" id="panel-precautions">
+                                <ul id="list-precautions" class="support-list">
+                                    <!-- Populated by JS -->
+                                </ul>
+                            </div>
+                            <!-- Medical Advice Section -->
+                            <div class="decision-panel" id="panel-medical">
+                                <div class="warning-alert-box" id="warning-box">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                    <p id="text-medical">Advice...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-footer">
+                        <button class="btn btn-secondary" id="reset-btn">
+                            <i class="fa-solid fa-rotate-left"></i> Analyze Another Image
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- History Drawer -->
+    <div class="history-drawer" id="history-drawer">
+        <div class="drawer-overlay" id="drawer-overlay"></div>
+        <div class="drawer-content">
+            <div class="drawer-header">
+                <h2><i class="fa-solid fa-clock-rotate-left"></i> Scan History</h2>
+                <button class="close-btn" id="close-drawer-btn">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="drawer-actions">
+                <button class="btn btn-danger-outline btn-sm" id="clear-history-btn">
+                    <i class="fa-solid fa-trash-can"></i> Clear All Scans
+                </button>
+            </div>
+            
+            <div class="drawer-body" id="history-list-container">
+                <!-- Populated dynamically via JS -->
+                <div class="empty-history" id="empty-history-msg">
+                    <i class="fa-regular fa-folder-open"></i>
+                    <p>No scans recorded yet</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
